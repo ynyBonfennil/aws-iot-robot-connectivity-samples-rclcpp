@@ -8,6 +8,12 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+set(AWS_SDK_INCLUDE_DIR $ENV{HOME}/sdk-workspace/include)
+set(AWS_SDK_LIB_DIR $ENV{HOME}/sdk-workspace/lib)
+
+include_directories(${AWS_SDK_INCLUDE_DIR})
+link_directories(${AWS_SDK_LIB_DIR})
+
 ament_auto_add_executable(
   mock_telemetry_publisher src/mock_telemetry_publisher.cpp)
 ament_auto_add_executable(

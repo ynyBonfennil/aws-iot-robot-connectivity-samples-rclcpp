@@ -17,9 +17,34 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <fstream>
+
+#include <aws/crt/Api.h>
+#include <aws/crt/StlAllocator.h>
+#include <aws/crt/auth/Credentials.h>
+#include <aws/crt/io/TlsOptions.h>
+#include <aws/iot/MqttClient.h>
+#include <aws/crt/UUID.h>
+#include <nlohmann/json.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
+
 
 class MqttTelemetryPublisher : public rclcpp::Node
 {
+private:
+  std::string path_for_config_;
+  bool discover_endpoints_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
+
+private:
+  void connectToEndpoint(const nlohmann::json &);
+  void connectUsingDiscovery(const nlohmann::json &);
+  void initSubs();
+  void listenerCallback(const std_msgs::msg::String &);
+
+public:
+  MqttTelemetryPublisher();
 
 };
