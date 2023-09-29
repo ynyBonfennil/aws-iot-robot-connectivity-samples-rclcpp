@@ -1,0 +1,30 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "bbox",
+        "bringup",
+        "colcon",
+        "coveragepy",
+        "deproject",
+        "distro",
+        "dobot",
+        "geochelone",
+        "imwrite",
+        "libopenvino",
+        "m12watanabe1a",
+        "openvino",
+        "osrf",
+        "rclcpp",
+        "realsense",
+        "rosbag",
+        "rviz",
+        "showimage",
+        "tensorrt",
+        "urdf",
+        "vcstool",
+        "xacro",
+        "yolo",
+        "yolox"
+    ]
+}
