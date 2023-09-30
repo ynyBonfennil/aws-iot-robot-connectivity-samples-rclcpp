@@ -134,14 +134,22 @@ void MqttTelemetryPublisher::onDisconnect(Aws::Crt::Mqtt::MqttConnection &)
 void MqttTelemetryPublisher::initSubscription()
 {
   this->subscription_ = this->create_subscription<std_msgs::msg::String>(
-    "mock_telemetry",
-    10,
+    "mock_telemetry", 10,
     std::bind(&MqttTelemetryPublisher::onSubscriptionMsg, this, std::placeholders::_1));
 }
 
-void MqttTelemetryPublisher::onSubscriptionMsg(const std_msgs::msg::String &)
+void MqttTelemetryPublisher::onSubscriptionMsg(const std_msgs::msg::String & msg)
 {
-
+  Aws::Crt::String message = msg.data.c_str();
+  Aws::Crt::ByteBuf payload = Aws::Crt::ByteBufFromArray(
+    (const uint8_t *)message.data(), message.length());
+  auto onPublishComplete = [](Aws::Crt::Mqtt::MqttConnection &, uint16_t, int) {};
+  this->mqtt_connection_->Publish(
+    "ros2_mock_telemetry_topic",
+    AWS_MQTT_QOS_AT_LEAST_ONCE,
+    false,
+    payload,
+    onPublishComplete);
 }
 
 int main(int argc, char * argv[])
