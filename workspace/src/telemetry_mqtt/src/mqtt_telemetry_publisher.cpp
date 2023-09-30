@@ -33,7 +33,6 @@ MqttTelemetryPublisher::MqttTelemetryPublisher()
 MqttTelemetryPublisher::~MqttTelemetryPublisher()
 {
   this->subscription_.reset();
-
   this->mqtt_connection_->Disconnect();
 }
 
