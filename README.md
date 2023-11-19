@@ -1,4 +1,6 @@
-# Connect ROS2 robots to AWS IoT and capture telemetry
+# Connect ROS2 robots to AWS IoT and capture telemetry with rclcpp
+
+This is the rclcpp version of [aws-samples/aws-iot-robot-connectivity-samples-ros2](https://github.com/aws-samples/aws-iot-robot-connectivity-samples-ros2).
 
 ## Blog
 More information on the sample application with ROS2 and AWS IoT use cases is present [in this blog](https://aws.amazon.com/blogs/robotics/how-to-connect-your-robots-to-the-aws-cloud-and-drive-data-driven-innovation/)
