@@ -4,17 +4,19 @@
   <name>iot_shadow_service</name>
   <version>1.0.0</version>
   <description>Connect to IoT Shadow to publish updates and provide service call interaction</description>
-  <maintainer email="hartmir@amazon.com">Michael Hart</maintainer>
+  <maintainer email="veloute.de.jonquille@gmail.com">ynyBonfennil</maintainer>
   <license>MIT-0</license>
 
-  <exec_depend>rosidl_default_runtime</exec_depend>
-  <exec_depend>ros2launch</exec_depend>
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>python3-pytest</test_depend>
+  <depend>aws_sdk_cpp_vendor</depend>
+  <depend>iot_shadow_service_msgs</depend>
+  <depend>nlohmann_json</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
