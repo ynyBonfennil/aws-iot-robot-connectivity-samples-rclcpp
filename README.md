@@ -1,19 +1,19 @@
 # Connect ROS2 robots to AWS IoT and capture telemetry with rclcpp
 
-This is the rclcpp version of [aws-samples/aws-iot-robot-connectivity-samples-ros2](https://github.com/aws-samples/aws-iot-robot-connectivity-samples-ros2).
+__This is the rclcpp version of [aws-samples/aws-iot-robot-connectivity-samples-ros2](https://github.com/aws-samples/aws-iot-robot-connectivity-samples-ros2).__
 
 ## Blog
 More information on the sample application with ROS2 and AWS IoT use cases is present [in this blog](https://aws.amazon.com/blogs/robotics/how-to-connect-your-robots-to-the-aws-cloud-and-drive-data-driven-innovation/)
 
 ## Sample application walkthrough
 
-Learn how to send telemetry from a ROS2-based robot to AWS IoT Core over MQTT and via IoT Shadow by following these steps.
+Learn how to send telemetry from a ROS2-based robot to AWS IoT Core over MQTT by following these steps.
 
 1. Install and setup AWS CLI v2 on your development machine
 2. Build ROS2 packages
 3. Define IoT Thing of your device on AWS and create X.509 certificate for it
 4. Define policy of the IoT Thing
-5. Run the program with certificate and check if it can connect to AWS IoT Core
+5. Run the program with the certificate and check if it can connect to AWS IoT Core
 
 This code was tested on an [Ubuntu 22.04](https://www.releases.ubuntu.com/22.04/) system on [ROS2 Humble](https://docs.ros.org/en/humble/index.html).
 
@@ -226,7 +226,7 @@ This section shows how to create and interact with an IoT Core Named Shadow. The
 
 The digit generator uses a service call to set the `desired` state. The shadow node listens to any shadow updates and publishes a ROS2 topic. The safe cracker robot subscribes it and uses a service call to set the `reported` state. More information on shadow use is available later in this file.
 
-### 1. create a named shadow
+### 1. Create a named shadow
 
 To set up this application, you first need to create a named shadow for the Thing. As environment variables are reused from the previous setup, it is recommended to reuse the terminal from the setup steps. Creating the shadow can be done as follows:
 
@@ -235,7 +235,7 @@ export SHADOW_NAME=my_ros2_shadow
 aws iot-data update-thing-shadow --thing-name $THING_NAME --shadow-name $SHADOW_NAME --payload "{\"state\":{\"reported\":{}}}" --cli-binary-format raw-in-base64-out /dev/null
 ```
 
-### 2. create a policy
+### 2. Create a policy
 
 Once the shadow is created, a policy is needed to allow interaction with the shadow. The template is as follows:
 
@@ -291,7 +291,7 @@ aws iot attach-policy --policy-name $SHADOW_POLICY_NAME --target $CERT_ARN
 
 This is sufficient permission to interact with the shadow.
 
-### 3. run the program
+### 3. Run the program
 
 The sample application can now be run as follows:
 
