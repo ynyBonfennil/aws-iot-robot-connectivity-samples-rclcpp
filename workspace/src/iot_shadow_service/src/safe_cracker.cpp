@@ -26,6 +26,8 @@ SafeCracker::SafeCracker()
 
 void SafeCracker::init()
 {
+  this->init_timer_.reset();
+
   this->current_digit_ = 0;
   this->target_digit_ = 0;
   this->clockwise_ = true;

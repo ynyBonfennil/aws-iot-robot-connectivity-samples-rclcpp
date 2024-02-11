@@ -12,10 +12,13 @@ ament_auto_add_executable(
   digit_generator src/digit_generator.cpp)
 ament_auto_add_executable(
   safe_cracker src/safe_cracker.cpp)
+ament_auto_add_executable(
+  iot_shadow_node src/iot_shadow_node.cpp)
 
 install(TARGETS
   digit_generator
-  safe_cracker)
+  safe_cracker
+  iot_shadow_node)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
