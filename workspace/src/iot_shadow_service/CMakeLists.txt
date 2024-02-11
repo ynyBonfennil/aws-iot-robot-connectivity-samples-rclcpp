@@ -10,9 +10,12 @@ ament_auto_find_build_dependencies()
 
 ament_auto_add_executable(
   digit_generator src/digit_generator.cpp)
+ament_auto_add_executable(
+  safe_cracker src/safe_cracker.cpp)
 
 install(TARGETS
-  digit_generator)
+  digit_generator
+  safe_cracker)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
