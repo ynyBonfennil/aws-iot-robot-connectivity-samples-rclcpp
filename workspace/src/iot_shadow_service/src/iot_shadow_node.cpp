@@ -21,8 +21,10 @@ IoTShadowNode::IoTShadowNode()
 {
   this->declare_parameter<std::string>("path_for_config", "");
   this->declare_parameter<std::string>("shadow_name", "");
+  this->declare_parameter<bool>("discover_endpoints", false);
 
   this->get_parameter("path_for_config", this->path_for_config_);
+  this->get_parameter("shadow_name", this->shadow_name_);
   this->get_parameter("discover_endpoints", this->discover_endpoints_);
 
   this->init_timer_ = this->create_wall_timer(
@@ -43,6 +45,7 @@ void IoTShadowNode::initMqttConnection()
   nlohmann::json cert_data;
   config_file >> cert_data;
   RCLCPP_INFO(this->get_logger(), "Config we are loading is :\n%s", cert_data.dump().c_str());
+  this->thing_name_ = cert_data["clientID"].get<std::string>();
 
   // Establish MQTT Connection
   if (this->discover_endpoints_) {
@@ -108,6 +111,7 @@ void IoTShadowNode::onConnectionCompleted(
     std::exit(-1);
   } else {
     RCLCPP_INFO(this->get_logger(), "Connection completed with return code %d", return_code);
+    this->setupDeviceShadow();
     this->initNodeInterfaces();
   }
 }
@@ -130,12 +134,84 @@ void IoTShadowNode::onDisconnect(Aws::Crt::Mqtt::MqttConnection &)
   RCLCPP_INFO(this->get_logger(), "Disconnect completed");
 }
 
+void IoTShadowNode::setupDeviceShadow()
+{
+  // Setup device shadow connection
+  this->subscribe_delta_completed_promise_ = std::make_shared<std::promise<void>>();
+  this->subscribe_delta_accepted_completed_promise_ = std::make_shared<std::promise<void>>();
+  this->subscribe_delta_rejected_completed_promise_ = std::make_shared<std::promise<void>>();
+
+  Aws::Iotshadow::IotShadowClient shadow_client(this->mqtt_connection_);
+  Aws::Iotshadow::ShadowDeltaUpdatedSubscriptionRequest shadow_delta_updated_request;
+  shadow_delta_updated_request.ThingName = this->thing_name_;
+
+  using namespace std::placeholders;
+  shadow_client.SubscribeToShadowDeltaUpdatedEvents(
+    shadow_delta_updated_request,
+    AWS_MQTT_QOS_AT_LEAST_ONCE,
+    std::bind(&IoTShadowNode::onDeltaUpdated, this, _1, _2),
+    std::bind(&IoTShadowNode::onDeltaUpdatedSubAck, this, _1));
+  
+  Aws::Iotshadow::UpdateShadowSubscriptionRequest update_shadow_subscription_request;
+  update_shadow_subscription_request.ThingName = this->thing_name_;
+
+  shadow_client.SubscribeToUpdateShadowAccepted(
+    update_shadow_subscription_request,
+    AWS_MQTT_QOS_AT_LEAST_ONCE,
+    std::bind(&IoTShadowNode::onUpdateShadowAccepted, this, _1, _2),
+    std::bind(&IoTShadowNode::onDeltaUpdatedRejectedSubAck, this, _1));
+  
+  shadow_client.SubscribeToUpdateShadowRejected(
+    update_shadow_subscription_request,
+    AWS_MQTT_QOS_AT_LEAST_ONCE,
+    std::bind(&IoTShadowNode::onUpdateShadowRejected, this, _1, _2),
+    std::bind(&IoTShadowNode::onDeltaUpdatedRejectedSubAck, this, _1));
+
+  this->subscribe_delta_completed_promise_->get_future().wait();
+  this->subscribe_delta_accepted_completed_promise_->get_future().wait();
+  this->subscribe_delta_rejected_completed_promise_->get_future().wait();
+
+  // Get initial shadow document
+  this->subscribe_get_shadow_accepted_completed_promise_ = std::make_shared<std::promise<void>>();
+  this->subscribe_get_shadow_rejected_completed_promise_ = std::make_shared<std::promise<void>>();
+  Aws::Iotshadow::GetShadowSubscriptionRequest shadow_subscription_request;
+  shadow_subscription_request.ThingName = this->thing_name_;
+  shadow_client.SubscribeToGetShadowAccepted(
+    shadow_subscription_request,
+    AWS_MQTT_QOS_AT_LEAST_ONCE,
+    std::bind(&IoTShadowNode::onGetShadowAccepted, this, _1, _2),
+    std::bind(&IoTShadowNode::onGetShadowUpdatedAcceptedSubAck, this, _1));
+  
+  shadow_client.SubscribeToGetShadowRejected(
+    shadow_subscription_request,
+    AWS_MQTT_QOS_AT_LEAST_ONCE,
+    std::bind(&IoTShadowNode::onGetShadowRejected, this, _1, _2),
+    std::bind(&IoTShadowNode::onGetShadowUpdatedRejectedSubAck, this, _1));
+  
+  this->subscribe_get_shadow_accepted_completed_promise_->get_future().wait();
+  this->subscribe_get_shadow_rejected_completed_promise_->get_future().wait();
+
+  this->on_get_shadow_request_completed_promise_ = std::make_shared<std::promise<void>>();
+  this->got_initial_shadow_promise_ = std::make_shared<std::promise<void>>();
+
+  Aws::Iotshadow::GetShadowRequest shadow_get_request;
+  shadow_get_request.ThingName = this->thing_name_;
+  shadow_client.PublishGetShadow(
+    shadow_get_request,
+    AWS_MQTT_QOS_AT_LEAST_ONCE,
+    std::bind(&IoTShadowNode::onGetShadowRequestSubAck, this, _1));
+  
+  this->on_get_shadow_request_completed_promise_->get_future().wait();
+  this->got_initial_shadow_promise_->get_future().wait();
+}
+
 void IoTShadowNode::onDeltaUpdatedSubAck(int error)
 {
   if (error != AWS_OP_SUCCESS) {
     RCLCPP_ERROR(this->get_logger(), "Error subscribing to shadow delta: %s", Aws::Crt::ErrorDebugString(error));
     return;
   }
+  this->subscribe_delta_completed_promise_->set_value();
 }
 
 void IoTShadowNode::onDeltaUpdatedAcceptedSubAck(int error)
@@ -144,6 +220,7 @@ void IoTShadowNode::onDeltaUpdatedAcceptedSubAck(int error)
     RCLCPP_ERROR(this->get_logger(), "Error subscribing to shadow delta accepted: %s", Aws::Crt::ErrorDebugString(error));
     return;
   }
+  this->subscribe_delta_accepted_completed_promise_->set_value();
 }
 
 void IoTShadowNode::onDeltaUpdatedRejectedSubAck(int error)
@@ -152,51 +229,57 @@ void IoTShadowNode::onDeltaUpdatedRejectedSubAck(int error)
     RCLCPP_ERROR(this->get_logger(), "Error subscribing to shadow delta rejected: %s", Aws::Crt::ErrorDebugString(error));
     return;
   }
+  this->subscribe_delta_rejected_completed_promise_->set_value();
 }
 
-void IoTShadowNode::onDeltaUpdated(Aws::Iotshadow::ShadowDeltaUpdatedEvent *event, int error)
+void IoTShadowNode::onDeltaUpdated(Aws::Iotshadow::ShadowDeltaUpdatedEvent *, int )
 {
-  if (error) {
-    RCLCPP_ERROR(this->get_logger(), "Error processing shadow delta: %s", Aws::Crt::ErrorDebugString(error));
+
+}
+
+void IoTShadowNode::onUpdateShadowAccepted(Aws::Iotshadow::UpdateShadowResponse *, int)
+{
+
+}
+
+void IoTShadowNode::onUpdateShadowRejected(Aws::Iotshadow::ErrorResponse *, int)
+{
+
+}
+
+void IoTShadowNode::onGetShadowUpdatedAcceptedSubAck(int error)
+{
+  if (error != AWS_OP_SUCCESS) {
+    RCLCPP_ERROR(this->get_logger(), "Error subscribing to get shadow document accepted: %s", Aws::Crt::ErrorDebugString(error));
     return;
   }
+  this->subscribe_get_shadow_accepted_completed_promise_->set_value();
+}
 
-  if (event) {
-    RCLCPP_INFO(this->get_logger(), "Received shadow delta event.");
+void IoTShadowNode::onGetShadowUpdatedRejectedSubAck(int error)
+{
+  if (error != AWS_OP_SUCCESS) {
+    RCLCPP_ERROR(this->get_logger(), "Error subscribing to get shadow document rejected: %s", Aws::Crt::ErrorDebugString(error));
+    return;
   }
+  this->subscribe_get_shadow_rejected_completed_promise_->set_value();
 }
 
-void onUpdateShadowAccepted(Aws::Iotshadow::UpdateShadowResponse *, int)
+void IoTShadowNode::onGetShadowRequestSubAck(int error)
+{
+  if (error != AWS_OP_SUCCESS) {
+    RCLCPP_ERROR(this->get_logger(), "Error getting shadow document: %s", Aws::Crt::ErrorDebugString(error));
+    return;
+  }
+  this->on_get_shadow_request_completed_promise_->set_value();
+}
+
+void IoTShadowNode::onGetShadowAccepted(Aws::Iotshadow::GetShadowResponse *, int)
 {
 
 }
 
-void onUpdateShadowRejected(Aws::Iotshadow::ErrorResponse *, int)
-{
-
-}
-
-void onGetShadowUpdatedAcceptedSubAck(int)
-{
-
-}
-
-void onGetShadowUpdatedRejectedSubAck(int)
-{
-
-}
-
-void onGetShadowRequestSubAck(int)
-{
-
-}
-
-void onGetShadowAccepted(Aws::Iotshadow::GetShadowResponse *, int)
-{
-
-}
-
-void onGetShadowRejected(Aws::Iotshadow::ErrorResponse *, int)
+void IoTShadowNode::onGetShadowRejected(Aws::Iotshadow::ErrorResponse *, int)
 {
 
 }

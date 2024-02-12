@@ -63,8 +63,18 @@ private:
 
   std::string thing_name_, shadow_name_;
 
+  // promises
+  std::shared_ptr<std::promise<void>> subscribe_delta_completed_promise_;
+  std::shared_ptr<std::promise<void>> subscribe_delta_accepted_completed_promise_;
+  std::shared_ptr<std::promise<void>> subscribe_delta_rejected_completed_promise_;
+  std::shared_ptr<std::promise<void>> subscribe_get_shadow_accepted_completed_promise_;
+  std::shared_ptr<std::promise<void>> subscribe_get_shadow_rejected_completed_promise_;
+  std::shared_ptr<std::promise<void>> on_get_shadow_request_completed_promise_;
+  std::shared_ptr<std::promise<void>> got_initial_shadow_promise_;
+
 private:
   void initMqttConnection();
+  void setupDeviceShadow();
   void connectToEndpoint(const nlohmann::json &);
   void connectUsingDiscovery(const nlohmann::json &);
   void onConnectionCompleted(Aws::Crt::Mqtt::MqttConnection &, int, Aws::Crt::Mqtt::ReturnCode, bool);
