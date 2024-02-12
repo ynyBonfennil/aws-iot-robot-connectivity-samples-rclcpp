@@ -1,0 +1,3 @@
+[submodule "workspace/src/aws_iot_device_sdk_cpp_v2_vendor"]
+	path = workspace/src/aws_iot_device_sdk_cpp_v2_vendor
+	url = https://github.com/ynyBonfennil/aws_iot_device_sdk_cpp_v2_vendor

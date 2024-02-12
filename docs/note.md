@@ -21,7 +21,7 @@ In short, you should use AWS IoT Device SDK for C++ v2 when using AWS IoT, and i
 
 ## Installation of AWS Crt Cpp
 
-In this project, we use [aws_sdk_cpp_vendor](https://github.com/ros2-gbp/aws_sdk_cpp_vendor-release), which is a vendor package of AWS Crt Cpp for ROS2 environment. With this package, you only need to run `apt install ros-humble-aws-sdk-cpp-vendor` to install AWS Crt Cpp.
+In this project, we use [aws_iot_device_sdk_cpp_v2_vendor](https://github.com/ynyBonfennil/aws_iot_device_sdk_cpp_v2_vendor), which is a vendor package of AWS IoT Device SDK for C++ v2 for ROS2 environment. It is referenced as a submodule in `workspace/src/aws_iot_device_sdk_cpp_v2_vendor`.
 
 ## Relationship between the Simple MQTT Client and Device Shadow Node
 
