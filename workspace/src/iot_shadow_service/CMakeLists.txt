@@ -8,12 +8,17 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+find_package(aws-crt-cpp REQUIRED)
+
 ament_auto_add_executable(
   digit_generator src/digit_generator.cpp)
 ament_auto_add_executable(
   safe_cracker src/safe_cracker.cpp)
 ament_auto_add_executable(
   iot_shadow_node src/iot_shadow_node.cpp)
+
+target_link_libraries(
+  iot_shadow_node AWS::aws-crt-cpp)
 
 install(TARGETS
   digit_generator

@@ -24,12 +24,23 @@
 #include <random>
 #include <rclcpp/rclcpp.hpp>
 
+#include <aws/crt/Api.h>
+#include <aws/crt/UUID.h>
+#include <aws/iot/MqttClient.h>
+
 #include <iot_shadow_service_msgs/msg/shadow_update_snapshot.hpp>
 #include <iot_shadow_service_msgs/srv/update_shadow.hpp>
 
 class IoTShadowNode : public rclcpp::Node
 {
 private:
+  // Initialize API
+  Aws::Crt::ApiHandle api_handle_;
+
+  std::string path_for_config_;
+  bool discover_endpoints_;
+  std::shared_ptr<Aws::Crt::Mqtt::MqttConnection> mqtt_connection_;
+
   rclcpp::TimerBase::SharedPtr init_timer_;
   rclcpp::TimerBase::SharedPtr spin_timer_;
 
@@ -40,13 +51,22 @@ private:
 
   std::string thing_name_, shadow_name_;
 
-public:
-  IoTShadowNode();
+private:
+  void initMqttConnection();
+  void connectToEndpoint(const nlohmann::json &);
+  void connectUsingDiscovery(const nlohmann::json &);
+  void onConnectionCompleted(Aws::Crt::Mqtt::MqttConnection &, int, Aws::Crt::Mqtt::ReturnCode, bool);
+  void onInterrupted(Aws::Crt::Mqtt::MqttConnection &, int);
+  void onResumed(Aws::Crt::Mqtt::MqttConnection &, Aws::Crt::Mqtt::ReturnCode, bool);
+  void onDisconnect(Aws::Crt::Mqtt::MqttConnection &);
+
+  void initNodeInterfaces();
   void onShadowUpdateSnapshot(const iot_shadow_service_msgs::msg::ShadowUpdateSnapshot &);
   void onPublishToShadow(
     const std::shared_ptr<iot_shadow_service_msgs::srv::UpdateShadow::Request>,
     std::shared_ptr<iot_shadow_service_msgs::srv::UpdateShadow::Response>);
 
-private:
-  void init();
+public:
+  IoTShadowNode();
+  ~IoTShadowNode();
 };
