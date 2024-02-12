@@ -359,6 +359,10 @@ IoT Core Shadows are human-readable JSON documents structured into `desired` and
 
 For the sample application, one node generates data, updating the `desired` section. The other node listens for updates to the `desired` section for its next target. Whenever it changes its state, it updates the `reported` state. The `delta` field is not used. The result is that the shadow shows an update to the `desired` digit every four seconds, with the `reported` digit moving towards the `desired` digit, alternating between upwards and downwards.
 
+## About the implementation
+
+[This note](./docs/note.md) has some information (not much) about the implementation.
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
