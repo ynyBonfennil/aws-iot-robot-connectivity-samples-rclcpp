@@ -3,7 +3,12 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/workspace/src/iot_shadow_service/include/**",
+                "${workspaceFolder}/workspace/src/telemetry_mqtt/include/**",
+                "${workspaceFolder}/workspace/install/aws_iot_device_sdk_cpp_v2_vendor/opt/aws_iot_device_sdk_cpp_v2_vendor/include/**",
+                "${workspaceFolder}/workspace/install/iot_shadow_service_msgs/include/**",
+                "/opt/ros/humble/include/**",
+                "/usr/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

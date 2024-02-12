@@ -27,6 +27,18 @@
 #include <aws/crt/Api.h>
 #include <aws/crt/UUID.h>
 #include <aws/iot/MqttClient.h>
+#include <aws/iotshadow/ErrorResponse.h>
+#include <aws/iotshadow/IotShadowClient.h>
+#include <aws/iotshadow/ShadowDeltaUpdatedEvent.h>
+#include <aws/iotshadow/ShadowDeltaUpdatedSubscriptionRequest.h>
+#include <aws/iotshadow/UpdateShadowRequest.h>
+#include <aws/iotshadow/UpdateShadowResponse.h>
+#include <aws/iotshadow/UpdateShadowSubscriptionRequest.h>
+
+#include <aws/iotshadow/GetShadowRequest.h>
+#include <aws/iotshadow/GetShadowResponse.h>
+#include <aws/iotshadow/GetShadowSubscriptionRequest.h>
+#include <aws/iotshadow/UpdateShadowSubscriptionRequest.h>
 
 #include <iot_shadow_service_msgs/msg/shadow_update_snapshot.hpp>
 #include <iot_shadow_service_msgs/srv/update_shadow.hpp>
@@ -59,6 +71,19 @@ private:
   void onInterrupted(Aws::Crt::Mqtt::MqttConnection &, int);
   void onResumed(Aws::Crt::Mqtt::MqttConnection &, Aws::Crt::Mqtt::ReturnCode, bool);
   void onDisconnect(Aws::Crt::Mqtt::MqttConnection &);
+
+  void onDeltaUpdatedSubAck(int);
+  void onDeltaUpdatedAcceptedSubAck(int);
+  void onDeltaUpdatedRejectedSubAck(int);
+  void onDeltaUpdated(Aws::Iotshadow::ShadowDeltaUpdatedEvent *, int);
+  void onUpdateShadowAccepted(Aws::Iotshadow::UpdateShadowResponse *, int);
+  void onUpdateShadowRejected(Aws::Iotshadow::ErrorResponse *, int);
+
+  void onGetShadowUpdatedAcceptedSubAck(int);
+  void onGetShadowUpdatedRejectedSubAck(int);
+  void onGetShadowRequestSubAck(int);
+  void onGetShadowAccepted(Aws::Iotshadow::GetShadowResponse *, int);
+  void onGetShadowRejected(Aws::Iotshadow::ErrorResponse *, int);
 
   void initNodeInterfaces();
   void onShadowUpdateSnapshot(const iot_shadow_service_msgs::msg::ShadowUpdateSnapshot &);

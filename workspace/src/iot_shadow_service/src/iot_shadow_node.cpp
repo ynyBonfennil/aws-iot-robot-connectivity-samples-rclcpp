@@ -130,6 +130,77 @@ void IoTShadowNode::onDisconnect(Aws::Crt::Mqtt::MqttConnection &)
   RCLCPP_INFO(this->get_logger(), "Disconnect completed");
 }
 
+void IoTShadowNode::onDeltaUpdatedSubAck(int error)
+{
+  if (error != AWS_OP_SUCCESS) {
+    RCLCPP_ERROR(this->get_logger(), "Error subscribing to shadow delta: %s", Aws::Crt::ErrorDebugString(error));
+    return;
+  }
+}
+
+void IoTShadowNode::onDeltaUpdatedAcceptedSubAck(int error)
+{
+  if (error != AWS_OP_SUCCESS) {
+    RCLCPP_ERROR(this->get_logger(), "Error subscribing to shadow delta accepted: %s", Aws::Crt::ErrorDebugString(error));
+    return;
+  }
+}
+
+void IoTShadowNode::onDeltaUpdatedRejectedSubAck(int error)
+{
+  if (error != AWS_OP_SUCCESS) {
+    RCLCPP_ERROR(this->get_logger(), "Error subscribing to shadow delta rejected: %s", Aws::Crt::ErrorDebugString(error));
+    return;
+  }
+}
+
+void IoTShadowNode::onDeltaUpdated(Aws::Iotshadow::ShadowDeltaUpdatedEvent *event, int error)
+{
+  if (error) {
+    RCLCPP_ERROR(this->get_logger(), "Error processing shadow delta: %s", Aws::Crt::ErrorDebugString(error));
+    return;
+  }
+
+  if (event) {
+    RCLCPP_INFO(this->get_logger(), "Received shadow delta event.");
+  }
+}
+
+void onUpdateShadowAccepted(Aws::Iotshadow::UpdateShadowResponse *, int)
+{
+
+}
+
+void onUpdateShadowRejected(Aws::Iotshadow::ErrorResponse *, int)
+{
+
+}
+
+void onGetShadowUpdatedAcceptedSubAck(int)
+{
+
+}
+
+void onGetShadowUpdatedRejectedSubAck(int)
+{
+
+}
+
+void onGetShadowRequestSubAck(int)
+{
+
+}
+
+void onGetShadowAccepted(Aws::Iotshadow::GetShadowResponse *, int)
+{
+
+}
+
+void onGetShadowRejected(Aws::Iotshadow::ErrorResponse *, int)
+{
+
+}
+
 void IoTShadowNode::initNodeInterfaces()
 {
   using namespace std::placeholders;
@@ -157,7 +228,7 @@ void IoTShadowNode::onShadowUpdateSnapshot(const iot_shadow_service_msgs::msg::S
 
 void IoTShadowNode::onPublishToShadow(
   const std::shared_ptr<iot_shadow_service_msgs::srv::UpdateShadow::Request> request,
-  std::shared_ptr<iot_shadow_service_msgs::srv::UpdateShadow::Response> response)
+  std::shared_ptr<iot_shadow_service_msgs::srv::UpdateShadow::Response>)
 {
   RCLCPP_INFO(this->get_logger(), "Got publish shadow request:");
   RCLCPP_INFO(this->get_logger(), "desired: %s", request->desired.c_str());

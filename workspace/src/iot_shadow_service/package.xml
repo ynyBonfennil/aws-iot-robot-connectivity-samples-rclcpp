@@ -7,7 +7,7 @@
   <maintainer email="veloute.de.jonquille@gmail.com">ynyBonfennil</maintainer>
   <license>MIT-0</license>
 
-  <depend>aws_sdk_cpp_vendor</depend>
+  <depend>aws_iot_device_sdk_cpp_v2_vendor</depend>
   <depend>iot_shadow_service_msgs</depend>
   <depend>nlohmann_json</depend>
   <depend>rclcpp</depend>

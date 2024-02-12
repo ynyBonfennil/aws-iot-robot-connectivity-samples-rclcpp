@@ -6,7 +6,7 @@ There are several libraries that can be used for AWS IoT;
 
 - [AWS Crt Cpp](https://github.com/awslabs/aws-crt-cpp)
 - [AWS SDK for C++](https://github.com/aws/aws-sdk-cpp)
-- [AWS IoT Device SDK for C++ v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2).
+- [AWS IoT Device SDK for C++ v2](https://github.com/aws/aws-iot-device-sdk-cpp-v2)
 
 The relationships among them are
 

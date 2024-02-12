@@ -9,7 +9,7 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
-  <depend>aws_sdk_cpp_vendor</depend>
+  <depend>aws_iot_device_sdk_cpp_v2_vendor</depend>
   <depend>rclcpp_components</depend>
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
